@@ -1,0 +1,277 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum Role {
+  ADMIN
+  INSTRUCTOR
+  STUDENT
+}
+
+enum EnrollmentStatus {
+  ENROLLED
+  WAITLISTED
+  DROPPED
+  COMPLETED
+}
+
+enum GradeValue {
+  A_PLUS
+  A
+  A_MINUS
+  B_PLUS
+  B
+  B_MINUS
+  C_PLUS
+  C
+  D
+  F
+  P
+  I
+  W
+  DO
+  NG
+}
+
+// ============================================================
+// BETTER-AUTH MODELS
+// ============================================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+
+  // CampusHub custom fields
+  firstName     String
+  lastName      String
+  role          Role      @default(STUDENT)
+  isActive      Boolean   @default(true)
+
+  // Relations
+  enrollments           Enrollment[]
+  instructorAssignments InstructorAssignment[]
+  sessions              Session[]
+  accounts              Account[]
+  notifications         Notification[]
+  announcements         Announcement[]      @relation("AnnouncementAuthor")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([email])
+  @@index([role])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([token])
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ============================================================
+// APPLICATION MODELS
+// ============================================================
+
+model Semester {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(false)
+
+  enrollmentStart DateTime
+  enrollmentEnd   DateTime
+  dropDeadline    DateTime
+
+  // Relations
+  courses Course[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([isActive])
+  @@index([code])
+}
+
+model Course {
+  id          String  @id @default(cuid())
+  code        String
+  name        String
+  description String?
+  credits     Int     @default(3)
+  capacity    Int     @default(30)
+
+  semesterId String
+  semester   Semester @relation(fields: [semesterId], references: [id])
+
+  // Relations
+  enrollments           Enrollment[]
+  instructorAssignments InstructorAssignment[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([code, semesterId])
+  @@index([semesterId])
+}
+
+model InstructorAssignment {
+  id String @id @default(cuid())
+
+  instructorId String
+  instructor   User   @relation(fields: [instructorId], references: [id])
+
+  courseId String
+  course  Course @relation(fields: [courseId], references: [id])
+
+  isPrimary Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([instructorId, courseId])
+  @@index([instructorId])
+  @@index([courseId])
+}
+
+model Enrollment {
+  id String @id @default(cuid())
+
+  studentId String
+  student   User   @relation(fields: [studentId], references: [id])
+
+  courseId String
+  course  Course @relation(fields: [courseId], references: [id])
+
+  status     EnrollmentStatus @default(ENROLLED)
+  enrolledAt DateTime         @default(now())
+  droppedAt  DateTime?
+
+  // Grade info (null until graded)
+  grade       GradeValue?
+  gradePoints Float?
+  gradedAt    DateTime?
+  gradedBy    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, courseId])
+  @@index([studentId])
+  @@index([courseId])
+  @@index([status])
+}
+
+// ============================================================
+// PHASE 2: PREREQUISITES
+// ============================================================
+
+model CoursePrerequisite {
+  id               String @id @default(cuid())
+  courseCode       String   // The course code that requires the prerequisite (e.g., "CS201")
+  prerequisiteCode String   // The prerequisite course code (e.g., "CS101")
+
+  createdAt DateTime @default(now())
+
+  @@unique([courseCode, prerequisiteCode])
+  @@index([courseCode])
+}
+
+// ============================================================
+// PHASE 2: NOTIFICATIONS & ANNOUNCEMENTS
+// ============================================================
+
+enum NotificationType {
+  ENROLLMENT
+  GRADE
+  ANNOUNCEMENT
+  SYSTEM
+}
+
+model Notification {
+  id      String           @id @default(cuid())
+  userId  String
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title   String
+  message String
+  type    NotificationType
+  isRead  Boolean          @default(false)
+  link    String?          // Optional link to navigate to
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+model Announcement {
+  id          String  @id @default(cuid())
+  title       String
+  content     String
+  authorId    String
+  author      User    @relation("AnnouncementAuthor", fields: [authorId], references: [id])
+  targetRole  Role?   // null = all roles
+  isPublished Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isPublished])
+  @@index([targetRole])
+}
