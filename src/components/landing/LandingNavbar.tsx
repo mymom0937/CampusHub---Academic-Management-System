@@ -11,53 +11,52 @@ type LandingNavbarProps = {
   dashboardPath: string | null
 }
 
+const navLinks = [
+  { to: '/', label: 'Home' },
+  { to: '/', hash: 'about', label: 'About' },
+  { to: '/', hash: 'academics', label: 'Academics' },
+  { to: '/', hash: 'campus', label: 'Campus Life' },
+  { to: '/news', label: 'News' },
+  { to: '/', hash: 'contact', label: 'Contact' },
+]
+
 export function LandingNavbar({ user, dashboardPath }: LandingNavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
         <Link to="/" className="flex items-center gap-2">
-          <GraduationCap className="h-7 w-7 text-primary" />
-          <span className="font-bold text-xl">CampusHub</span>
+          <GraduationCap className="h-8 w-8 text-primary" />
+          <div className="hidden sm:block">
+            <span className="font-bold text-lg">CampusHub</span>
+            <span className="block text-[10px] text-muted-foreground -mt-0.5">Academic Management</span>
+          </div>
+          <span className="font-bold text-lg sm:hidden">CampusHub</span>
         </Link>
 
         {/* Desktop Nav */}
         <nav className="flex items-center gap-1 max-md:hidden">
-          <Link
-            to="/"
-            hash="features"
-            className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md"
-          >
-            Features
-          </Link>
-          <Link
-            to="/"
-            hash="highlights"
-            className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md"
-          >
-            Highlights
-          </Link>
-          <Link
-            to="/"
-            hash="about"
-            className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md"
-          >
-            About
-          </Link>
-          <Link
-            to="/news"
-            className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md"
-          >
-            News
-          </Link>
-          <Link
-            to="/"
-            hash="contact"
-            className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md"
-          >
-            Contact
-          </Link>
+          {navLinks.map((link) =>
+            link.hash ? (
+              <Link
+                key={link.label}
+                to={link.to}
+                hash={link.hash}
+                className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md"
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <Link
+                key={link.label}
+                to={link.to}
+                className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md"
+              >
+                {link.label}
+              </Link>
+            )
+          )}
         </nav>
 
         <div className="flex items-center gap-2 max-md:hidden">
@@ -66,7 +65,7 @@ export function LandingNavbar({ user, dashboardPath }: LandingNavbarProps) {
             <Button asChild className="gap-2">
               <Link to={dashboardPath}>
                 <LayoutDashboard className="h-4 w-4" />
-                Dashboard
+                Portal
               </Link>
             </Button>
           ) : (
@@ -97,51 +96,34 @@ export function LandingNavbar({ user, dashboardPath }: LandingNavbarProps) {
       {/* Mobile menu */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t bg-background px-4 pb-4 pt-2 space-y-2">
-          <Link
-            to="/"
-            hash="features"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md"
-          >
-            Features
-          </Link>
-          <Link
-            to="/"
-            hash="highlights"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md"
-          >
-            Highlights
-          </Link>
-          <Link
-            to="/"
-            hash="about"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md"
-          >
-            About
-          </Link>
-          <Link
-            to="/news"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md"
-          >
-            News
-          </Link>
-          <Link
-            to="/"
-            hash="contact"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md"
-          >
-            Contact
-          </Link>
+          {navLinks.map((link) =>
+            link.hash ? (
+              <Link
+                key={link.label}
+                to={link.to}
+                hash={link.hash}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md"
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <Link
+                key={link.label}
+                to={link.to}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground rounded-md"
+              >
+                {link.label}
+              </Link>
+            )
+          )}
           <div className="flex gap-2 pt-2 border-t">
             {user && dashboardPath ? (
               <Button className="flex-1 gap-2" asChild>
                 <Link to={dashboardPath}>
                   <LayoutDashboard className="h-4 w-4" />
-                  Dashboard
+                  Portal
                 </Link>
               </Button>
             ) : (
@@ -160,4 +142,3 @@ export function LandingNavbar({ user, dashboardPath }: LandingNavbarProps) {
     </header>
   )
 }
-

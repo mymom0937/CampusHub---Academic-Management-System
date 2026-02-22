@@ -1,14 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { LandingAbout } from '@/components/landing/LandingAbout'
+import { LandingAcademics } from '@/components/landing/LandingAcademics'
+import { LandingCampusLife } from '@/components/landing/LandingCampusLife'
 import { LandingContact } from '@/components/landing/LandingContact'
 import { LandingCta } from '@/components/landing/LandingCta'
-import { LandingFeatures } from '@/components/landing/LandingFeatures'
+import { LandingExploreCampuses } from '@/components/landing/LandingExploreCampuses'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { LandingHero } from '@/components/landing/LandingHero'
-import { LandingHighlights } from '@/components/landing/LandingHighlights'
+import { LandingImpactNumbers } from '@/components/landing/LandingImpactNumbers'
 import { LandingNavbar } from '@/components/landing/LandingNavbar'
-import { LandingStats } from '@/components/landing/LandingStats'
+import { LandingNewsletter } from '@/components/landing/LandingNewsletter'
+import { LandingWhatsNew } from '@/components/landing/LandingWhatsNew'
 import { getSession } from '@/server/actions/auth.actions'
 import { ROLE_DASHBOARD_PATHS } from '@/types/roles'
 import type { SessionUser } from '@/types/dto'
@@ -29,9 +32,12 @@ function LandingPage() {
     <div className="min-h-screen flex flex-col">
       <LandingNavbar user={user} dashboardPath={dashboardPath} />
       <LandingHero user={user} dashboardPath={dashboardPath} />
-      <LandingStats />
-      <LandingFeatures />
-      <LandingHighlights />
+      <LandingImpactNumbers />
+      <LandingCampusLife />
+      <LandingWhatsNew />
+      <LandingExploreCampuses />
+      <LandingNewsletter />
+      <LandingAcademics />
       <LandingCta user={user} dashboardPath={dashboardPath} />
       <LandingAbout />
       <LandingContact />
