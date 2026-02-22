@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -31,23 +31,17 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { FormSkeleton } from '@/components/skeletons/FormSkeleton'
 
-import { getSession } from '@/server/actions/auth.actions'
+import { requireAdmin } from '@/lib/admin-route'
 import {
   getSemesterDetailAction,
   updateSemesterAction,
   listCoursesAction,
 } from '@/server/actions/course.actions'
 import { updateSemesterSchema } from '@/server/validators/course.schema'
-import type { SessionUser, SemesterListItem, CourseListItem } from '@/types/dto'
-import type { PaginatedData } from '@/types/api'
+import type { SessionUser, SemesterListItem } from '@/types/dto'
 
 export const Route = createFileRoute('/admin/semesters/$id')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    if (user.role !== 'ADMIN') throw redirect({ to: '/dashboard' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireAdmin() }),
   loader: async ({ params }) => {
     const [semester, courses] = await Promise.all([
       getSemesterDetailAction({ data: { id: params.id } }),
@@ -66,11 +60,10 @@ export const Route = createFileRoute('/admin/semesters/$id')({
 })
 
 function AdminSemesterDetailPage() {
-  const { semester: initialSemester, courses: initialCourses } =
-    Route.useLoaderData()
+  const { semester: initialSemester, courses } = Route.useLoaderData()
   const { user } = Route.useRouteContext() as { user: SessionUser }
+  const navigate = useNavigate()
   const [semester, setSemester] = useState<SemesterListItem>(initialSemester)
-  const [courses] = useState<PaginatedData<CourseListItem>>(initialCourses)
   const [saving, setSaving] = useState(false)
 
   const formatDate = (iso: string) => new Date(iso).toLocaleDateString()
@@ -233,9 +226,7 @@ function AdminSemesterDetailPage() {
                 description="No courses have been added to this semester yet."
                 action={{
                   label: 'Go to Courses',
-                  onClick: () => {
-                    window.location.href = '/admin/courses'
-                  },
+                  onClick: () => navigate({ to: '/admin/courses' }),
                 }}
               />
             ) : (

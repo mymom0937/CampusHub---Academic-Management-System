@@ -1,6 +1,6 @@
 import { AppError } from '@/server/errors/AppError'
 import * as notificationRepo from '@/server/repositories/notification.repository'
-import type { Role } from '../../../generated/prisma/client'
+import type { Role, MediaType } from '../../../generated/prisma/client'
 
 /** Get notifications for a user */
 export async function getUserNotifications(userId: string, unreadOnly: boolean = false) {
@@ -52,6 +52,8 @@ export async function createAnnouncement(data: {
   content: string
   authorId: string
   targetRole?: Role | null
+  mediaType?: MediaType | null
+  mediaUrl?: string | null
 }) {
   return notificationRepo.createAnnouncement(data)
 }
@@ -64,6 +66,8 @@ export async function updateAnnouncement(
     content?: string
     targetRole?: Role | null
     isPublished?: boolean
+    mediaType?: MediaType | null
+    mediaUrl?: string | null
   }
 ) {
   const existing = await notificationRepo.findAnnouncementById(id)
@@ -93,6 +97,8 @@ export async function listAnnouncements(role?: Role) {
     targetRole: a.targetRole,
     isPublished: a.isPublished,
     createdAt: a.createdAt.toISOString(),
+    mediaType: (a.mediaType ?? 'TEXT') as 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO',
+    mediaUrl: a.mediaUrl ?? null,
   }))
 }
 
@@ -107,5 +113,7 @@ export async function listAllAnnouncements() {
     targetRole: a.targetRole,
     isPublished: a.isPublished,
     createdAt: a.createdAt.toISOString(),
+    mediaType: (a.mediaType ?? 'TEXT') as 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO',
+    mediaUrl: a.mediaUrl ?? null,
   }))
 }

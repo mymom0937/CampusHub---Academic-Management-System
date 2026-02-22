@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useState, useRef } from 'react'
 import { ClipboardList, Upload } from 'lucide-react'
 import { toast } from 'sonner'
@@ -15,19 +15,14 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { TableSkeleton } from '@/components/skeletons/TableSkeleton'
-import { getSession } from '@/server/actions/auth.actions'
+import { requireInstructor } from '@/lib/admin-route'
 import { getCourseGradesAction, submitGradeAction, updateGradeAction, bulkSubmitGradesAction } from '@/server/actions/grade.actions'
 import { GRADE_LABELS } from '@/lib/constants'
 import type { SubmitGradeInput } from '@/server/validators/enrollment.schema'
 import type { SessionUser, StudentGradeEntry } from '@/types/dto'
 
 export const Route = createFileRoute('/instructor/grades/$courseId')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    if (user.role !== 'INSTRUCTOR') throw redirect({ to: '/dashboard' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireInstructor() }),
   loader: async ({ params }) => {
     const students = await getCourseGradesAction({ data: { courseId: params.courseId } })
     return { students, courseId: params.courseId }
@@ -239,7 +234,10 @@ function InstructorGradingPage() {
           </div>
         )}
         {/* Grade submission confirmation dialog */}
-        <AlertDialog open={!!confirmGrade} onOpenChange={(open) => !open && setConfirmGrade(null)}>
+        <AlertDialog
+          open={!!confirmGrade}
+          onOpenChange={(open) => !open && setConfirmGrade(null)}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>

@@ -23,7 +23,7 @@ export const registerSchema = z
       .transform((v) => v.toLowerCase().trim()),
     password: z
       .string()
-      .min(8, 'Password must be at least 8 characters')
+      .min(8, 'Password must be at least 8 characters!')
       .regex(
         passwordRegex,
         'Password must contain at least 1 uppercase, 1 lowercase, 1 number, and 1 special character (!@#$%^&*)'

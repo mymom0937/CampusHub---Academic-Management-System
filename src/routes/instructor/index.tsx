@@ -1,20 +1,15 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { BookOpen, Users, CheckCircle, Clock } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { StatsSkeleton } from '@/components/skeletons/CardSkeleton'
-import { getSession } from '@/server/actions/auth.actions'
+import { requireInstructor } from '@/lib/admin-route'
 import { getInstructorDashboardAction } from '@/server/actions/dashboard.actions'
 import type { SessionUser } from '@/types/dto'
 
 export const Route = createFileRoute('/instructor/')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    if (user.role !== 'INSTRUCTOR') throw redirect({ to: '/dashboard' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireInstructor() }),
   loader: async () => {
     const stats = await getInstructorDashboardAction()
     return { stats }
@@ -36,11 +31,11 @@ function InstructorDashboard() {
 
   return (
     <DashboardLayout user={user}>
-      <Breadcrumb items={[{ label: 'Instructor' }, { label: 'Dashboard' }]} />
+      <Breadcrumb items={[{ label: 'Instructor', href: '/instructor' }, { label: 'Dashboard' }]} />
       <div className="space-y-6 min-w-0">
         <div className="min-w-0">
           <h1 className="text-2xl font-bold tracking-tight break-words sm:text-3xl">Instructor Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Welcome back, {user.firstName}.</p>
+          <p className="text-muted-foreground mt-1">Welcome Back, {user.firstName}.</p>
         </div>
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {statCards.map((card, idx) => (

@@ -7,7 +7,7 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
-  console.log('Seeding database...')
+  // console.log('Seeding database...')
 
   // Clean existing data
   await prisma.enrollment.deleteMany()
@@ -78,7 +78,7 @@ async function main() {
     lastName: 'Johnson',
     role: 'INSTRUCTOR',
   })
-  console.log('Created 2 instructors')
+  // console.log('Created 2 instructors')
 
   const studentsData = [
     { email: 'alice@student.campushub.com', firstName: 'Alice', lastName: 'Williams' },
@@ -97,7 +97,7 @@ async function main() {
       })
     )
   )
-  console.log('Created 5 students')
+  // console.log('Created 5 students')
 
   // Create active semester
   const now = new Date()
@@ -137,7 +137,7 @@ async function main() {
       })
     )
   )
-  console.log('Created 5 courses')
+  // console.log('Created 5 courses')
 
   // Assign instructors
   await prisma.instructorAssignment.create({
@@ -155,7 +155,7 @@ async function main() {
   await prisma.instructorAssignment.create({
     data: { instructorId: instructor1.id, courseId: courses[4].id, isPrimary: true },
   })
-  console.log('Assigned instructors to courses')
+  // console.log('Assigned instructors to courses')
 
   // Create sample enrollments
   for (const student of students.slice(0, 3)) {
@@ -175,17 +175,7 @@ async function main() {
       data: { studentId: student.id, courseId: courses[3].id },
     })
   }
-  console.log('Created sample enrollments')
-
-  console.log('\nSeed completed!')
-  console.log('------------------------------')
-  console.log('Login credentials:')
-  console.log('  Admin:      admin@campushub.com / Admin123!')
-  console.log('  Instructor: john.smith@campushub.com / Instructor123!')
-  console.log('  Instructor: sarah.johnson@campushub.com / Instructor123!')
-  console.log('  Student:    alice@student.campushub.com / Student123!')
-  console.log('  Student:    bob@student.campushub.com / Student123!')
-  console.log('------------------------------')
+  // console.log('Created sample enrollments')
 }
 
 main()

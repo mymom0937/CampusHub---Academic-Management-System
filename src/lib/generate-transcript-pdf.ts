@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { GRADE_LABELS, GRADE_POINTS } from '@/lib/constants'
+import { GRADE_LABELS } from '@/lib/constants'
 import type { TranscriptEntry, GpaSummary, SessionUser } from '@/types/dto'
 
 interface TranscriptPdfData {

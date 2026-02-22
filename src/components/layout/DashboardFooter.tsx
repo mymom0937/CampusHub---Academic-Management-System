@@ -1,5 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { GraduationCap, Github, Mail, Globe } from 'lucide-react'
+import { ExternalLink } from '@/components/ui/external-link'
+import { GITHUB_URL, SUPPORT_EMAIL } from '@/lib/constants'
 
 export function DashboardFooter() {
   return (
@@ -17,22 +19,12 @@ export function DashboardFooter() {
             &copy; {new Date().getFullYear()} CampusHub. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="GitHub"
-            >
+            <ExternalLink href={GITHUB_URL} aria-label="GitHub">
               <Github className="h-5 w-5" />
-            </a>
-            <a
-              href="mailto:support@campushub.com"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Email"
-            >
+            </ExternalLink>
+            <ExternalLink href={`mailto:${SUPPORT_EMAIL}`} openInNewTab={false} aria-label="Email">
               <Mail className="h-5 w-5" />
-            </a>
+            </ExternalLink>
             <Link
               to="/"
               className="text-muted-foreground hover:text-foreground transition-colors"

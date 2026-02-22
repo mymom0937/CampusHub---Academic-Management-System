@@ -55,20 +55,19 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <HeadContent />
-        {/* Prevent FOUC for dark mode */}
+        {/* Prevent FOUC: run before any other scripts */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               try {
                 const theme = localStorage.getItem('campushub-theme');
-                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                  document.documentElement.classList.add('dark');
-                }
+                const isDark = theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                document.documentElement.classList.add(isDark ? 'dark' : 'light');
               } catch (e) {}
             `,
           }}
         />
+        <HeadContent />
       </head>
       <body className="min-h-screen bg-background text-foreground antialiased">
         {children}

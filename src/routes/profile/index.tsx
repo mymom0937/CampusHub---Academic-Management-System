@@ -1,5 +1,5 @@
-import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
-import { useForm } from 'react-hook-form'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { useState } from 'react'
@@ -17,7 +17,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { getSession } from '@/server/actions/auth.actions'
+import { requireAuth } from '@/lib/admin-route'
 import { updateProfileAction } from '@/server/actions/user.actions'
 import {
   updateProfileSchema,
@@ -27,11 +27,7 @@ import { ROLE_LABELS } from '@/types/roles'
 import type { SessionUser } from '@/types/dto'
 
 export const Route = createFileRoute('/profile/')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireAuth() }),
   component: ProfilePage,
 })
 
@@ -45,7 +41,7 @@ function ProfilePage() {
     handleSubmit,
     formState: { errors },
   } = useForm<UpdateProfileInput>({
-    resolver: zodResolver(updateProfileSchema),
+    resolver: zodResolver(updateProfileSchema) as Resolver<UpdateProfileInput>,
     defaultValues: {
       firstName: user.firstName,
       lastName: user.lastName,
@@ -71,7 +67,7 @@ function ProfilePage() {
 
   return (
     <DashboardLayout user={user}>
-      <Breadcrumb items={[{ label: 'Profile' }]} />
+      <Breadcrumb items={[{ label: 'Profile', href: '/profile' }]} />
       <div className="max-w-2xl space-y-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight break-words sm:text-3xl">

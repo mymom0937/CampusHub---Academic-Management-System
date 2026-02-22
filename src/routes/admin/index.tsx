@@ -1,22 +1,17 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { Users, BookOpen, Calendar, ClipboardList, TrendingUp, Clock } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { StatsSkeleton } from '@/components/skeletons/CardSkeleton'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { getSession } from '@/server/actions/auth.actions'
+import { requireAdmin } from '@/lib/admin-route'
 import { getAdminDashboardAction } from '@/server/actions/dashboard.actions'
 import { GRADE_LABELS } from '@/lib/constants'
-import type { AdminAnalytics, SessionUser } from '@/types/dto'
+import type { SessionUser } from '@/types/dto'
 
 export const Route = createFileRoute('/admin/')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    if (user.role !== 'ADMIN') throw redirect({ to: '/dashboard' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireAdmin() }),
   loader: async () => {
     const stats = await getAdminDashboardAction()
     return { stats }
@@ -96,12 +91,12 @@ function AdminDashboard() {
 
   return (
     <DashboardLayout user={user}>
-      <Breadcrumb items={[{ label: 'Admin' }, { label: 'Dashboard' }]} />
+      <Breadcrumb items={[{ label: 'Admin', href: '/admin' }, { label: 'Dashboard' }]} />
       <div className="space-y-6 min-w-0">
         <div className="min-w-0">
           <h1 className="text-2xl font-bold tracking-tight break-words sm:text-3xl">Admin Dashboard</h1>
           <p className="text-muted-foreground mt-1">
-            Welcome back, {user.firstName}. Here&apos;s an overview of your system.
+            Welcome Back, {user.firstName}. Here&apos;s an overview of your system.
           </p>
         </div>
 

@@ -1,19 +1,14 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { AcademicCalendar } from '@/components/AcademicCalendar'
 import { CardSkeleton } from '@/components/skeletons/CardSkeleton'
-import { getSession } from '@/server/actions/auth.actions'
+import { requireAdmin } from '@/lib/admin-route'
 import { listSemestersAction } from '@/server/actions/course.actions'
 import type { SessionUser } from '@/types/dto'
 
 export const Route = createFileRoute('/admin/calendar')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    if (user.role !== 'ADMIN') throw redirect({ to: '/dashboard' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireAdmin() }),
   loader: async () => {
     const semesters = await listSemestersAction()
     return { semesters }

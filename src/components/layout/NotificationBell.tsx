@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
-import { Bell, Check, CheckCheck } from 'lucide-react'
+import { Bell, CheckCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Badge } from '@/components/ui/badge'
+
 import {
   getNotificationsAction,
   getUnreadCountAction,

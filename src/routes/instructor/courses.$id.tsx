@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { BookOpen, Users, GraduationCap, ClipboardList } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -21,19 +21,14 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { TableSkeleton } from '@/components/skeletons/TableSkeleton'
-import { getSession } from '@/server/actions/auth.actions'
+import { requireInstructor } from '@/lib/admin-route'
 import { getInstructorCourseDetailAction } from '@/server/actions/course.actions'
 import { getCourseGradesAction } from '@/server/actions/grade.actions'
 import { GRADE_LABELS } from '@/lib/constants'
 import type { SessionUser, StudentGradeEntry, CourseListItem } from '@/types/dto'
 
 export const Route = createFileRoute('/instructor/courses/$id')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    if (user.role !== 'INSTRUCTOR') throw redirect({ to: '/dashboard' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireInstructor() }),
   loader: async ({ params }) => {
     const [course, students] = await Promise.all([
       getInstructorCourseDetailAction({ data: { id: params.id } }),

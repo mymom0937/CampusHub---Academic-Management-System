@@ -1,6 +1,6 @@
-import { createFileRoute, Link, redirect } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Calendar, Plus } from 'lucide-react'
 import { toast } from 'sonner'
@@ -24,18 +24,17 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { TableSkeleton } from '@/components/skeletons/TableSkeleton'
 
-import { getSession } from '@/server/actions/auth.actions'
-import { listSemestersAction, createSemesterAction, updateSemesterAction } from '@/server/actions/course.actions'
+import { requireAdmin } from '@/lib/admin-route'
+import {
+  listSemestersAction,
+  createSemesterAction,
+  updateSemesterAction,
+} from '@/server/actions/course.actions'
 import { createSemesterSchema, type CreateSemesterInput } from '@/server/validators/course.schema'
 import type { SessionUser, SemesterListItem } from '@/types/dto'
 
 export const Route = createFileRoute('/admin/semesters/')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    if (user.role !== 'ADMIN') throw redirect({ to: '/dashboard' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireAdmin() }),
   loader: async () => {
     const semesters = await listSemestersAction()
     return { semesters }
@@ -62,7 +61,7 @@ function AdminSemestersPage() {
     reset,
     formState: { errors },
   } = useForm<CreateSemesterInput>({
-    resolver: zodResolver(createSemesterSchema),
+    resolver: zodResolver(createSemesterSchema) as Resolver<CreateSemesterInput>,
   })
 
   const refreshSemesters = async () => {

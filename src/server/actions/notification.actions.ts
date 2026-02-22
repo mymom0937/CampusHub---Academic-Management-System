@@ -102,8 +102,11 @@ export const updateAnnouncementAction = createServerFn({ method: 'POST' })
       await notificationService.updateAnnouncement(data.id, {
         title: data.title,
         content: data.content,
-        targetRole: data.targetRole ?? undefined,
+        // NOTE: keep `null` (ALL users) distinct from `undefined` (no change)
+        targetRole: data.targetRole,
         isPublished: data.isPublished,
+        mediaType: data.mediaType,
+        mediaUrl: data.mediaUrl ?? null,
       })
       return { success: true as const }
     } catch (error) {

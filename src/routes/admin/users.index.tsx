@@ -1,6 +1,6 @@
-import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, Search, UserCog } from 'lucide-react'
 import { toast } from 'sonner'
@@ -27,19 +27,14 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { TableSkeleton } from '@/components/skeletons/TableSkeleton'
 
-import { getSession } from '@/server/actions/auth.actions'
+import { requireAdmin } from '@/lib/admin-route'
 import { listUsersAction, createUserAction, updateUserAction } from '@/server/actions/user.actions'
 import { createUserSchema, type CreateUserInput } from '@/server/validators/user.schema'
 import type { SessionUser, UserListItem } from '@/types/dto'
 import type { PaginatedData } from '@/types/api'
 
 export const Route = createFileRoute('/admin/users/')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    if (user.role !== 'ADMIN') throw redirect({ to: '/dashboard' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireAdmin() }),
   loader: async () => {
     const data = await listUsersAction({ data: { page: 1, pageSize: 20 } })
     return { users: data }
@@ -55,7 +50,6 @@ export const Route = createFileRoute('/admin/users/')({
 function AdminUsersPage() {
   const { users: initialData } = Route.useLoaderData()
   const { user } = Route.useRouteContext() as { user: SessionUser }
-  const navigate = useNavigate()
   const [users, setUsers] = useState<PaginatedData<UserListItem>>(initialData)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -69,7 +63,7 @@ function AdminUsersPage() {
     setValue,
     formState: { errors },
   } = useForm<CreateUserInput>({
-    resolver: zodResolver(createUserSchema),
+    resolver: zodResolver(createUserSchema) as Resolver<CreateUserInput>,
     defaultValues: { role: 'STUDENT' },
   })
 

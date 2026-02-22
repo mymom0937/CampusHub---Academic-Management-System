@@ -21,6 +21,7 @@ export const authMiddleware = createMiddleware().server(async ({ next }) => {
     lastName: (session.user as Record<string, unknown>).lastName as string,
     role: (session.user as Record<string, unknown>).role as UserRole,
     isActive: (session.user as Record<string, unknown>).isActive as boolean,
+    emailVerified: session.user.emailVerified ?? false,
   }
 
   if (!user.isActive) {

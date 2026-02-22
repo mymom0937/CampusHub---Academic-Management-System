@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { Download, FileText } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
@@ -10,18 +10,13 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { FormSkeleton } from '@/components/skeletons/FormSkeleton'
 
-import { getSession } from '@/server/actions/auth.actions'
+import { requireStudent } from '@/lib/admin-route'
 import { getTranscriptAction } from '@/server/actions/grade.actions'
 import { GRADE_LABELS } from '@/lib/constants'
 import type { SessionUser } from '@/types/dto'
 
 export const Route = createFileRoute('/student/transcript')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    if (user.role !== 'STUDENT') throw redirect({ to: '/dashboard' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireStudent() }),
   loader: async () => {
     const transcript = await getTranscriptAction()
     return { transcript }

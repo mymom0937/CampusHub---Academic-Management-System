@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { GraduationCap, MailCheck } from 'lucide-react'
@@ -25,7 +25,6 @@ export const Route = createFileRoute('/register')({
 })
 
 function RegisterPage() {
-  const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [verificationSent, setVerificationSent] = useState(false)
 
@@ -151,7 +150,7 @@ function RegisterPage() {
                   to="/login"
                   className="text-primary underline-offset-4 hover:underline font-medium"
                 >
-                  Sign in
+                  Sign In
                 </Link>
               </p>
             </CardFooter>

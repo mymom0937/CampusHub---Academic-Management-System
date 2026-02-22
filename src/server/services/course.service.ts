@@ -257,7 +257,23 @@ export async function listSemesters(): Promise<SemesterListItem[]> {
 // MAPPERS
 // ============================================================
 
-function mapCourseToDto(course: NonNullable<Awaited<ReturnType<typeof courseRepo.findCourseById>>>): CourseListItem {
+/** Minimal course shape needed for DTO mapping (works with various repo select shapes) */
+type CourseForDto = {
+  id: string
+  code: string
+  name: string
+  description: string | null
+  credits: number
+  capacity: number
+  semester: { id: string; name: string }
+  instructorAssignments: Array<{
+    instructor: { id: string; firstName: string; lastName: string }
+    isPrimary: boolean
+  }>
+  _count: { enrollments: number }
+}
+
+function mapCourseToDto(course: CourseForDto): CourseListItem {
   return {
     id: course.id,
     code: course.code,

@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -39,7 +39,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { FormSkeleton } from '@/components/skeletons/FormSkeleton'
 
-import { getSession } from '@/server/actions/auth.actions'
+import { requireAdmin } from '@/lib/admin-route'
 import {
   getUserDetailAction,
   updateUserAction,
@@ -51,12 +51,7 @@ import type { SessionUser, UserDetail } from '@/types/dto'
 import type { UserRole } from '@/types/roles'
 
 export const Route = createFileRoute('/admin/users/$id')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    if (user.role !== 'ADMIN') throw redirect({ to: '/dashboard' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireAdmin() }),
   loader: async ({ params }) => {
     const userDetail = await getUserDetailAction({ data: { id: params.id } })
     return { userDetail }

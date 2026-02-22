@@ -57,6 +57,7 @@ export function Navbar({ user, onMenuToggle }: NavbarProps) {
           <input
             type="search"
             placeholder="Search courses, students..."
+            aria-label="Search courses and students"
             className="flex h-9 w-full rounded-lg border border-input bg-muted/50 px-3 pl-9 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>

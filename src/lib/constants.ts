@@ -1,3 +1,7 @@
+/** Support contact */
+export const SUPPORT_EMAIL = 'support@campushub.com'
+export const GITHUB_URL = 'https://github.com'
+
 /** Maximum credits a student can enroll in per semester */
 export const MAX_CREDITS_PER_SEMESTER = 18
 

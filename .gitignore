@@ -31,4 +31,5 @@ nul
 # Project-specific (docs, temp, sensitive)
 todos.json
 uniportal_docs.txt
+CODEBASE_REVISION_GUIDE.txt
 cookies.txt

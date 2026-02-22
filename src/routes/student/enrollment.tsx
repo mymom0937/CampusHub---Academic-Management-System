@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { ClipboardList, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -10,18 +10,13 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { TableSkeleton } from '@/components/skeletons/TableSkeleton'
-import { getSession } from '@/server/actions/auth.actions'
+import { requireStudent } from '@/lib/admin-route'
 import { getStudentEnrollmentsAction, dropAction } from '@/server/actions/enrollment.actions'
 import { GRADE_LABELS } from '@/lib/constants'
 import type { SessionUser, EnrollmentListItem } from '@/types/dto'
 
 export const Route = createFileRoute('/student/enrollment')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    if (user.role !== 'STUDENT') throw redirect({ to: '/dashboard' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireStudent() }),
   loader: async () => {
     const enrollments = await getStudentEnrollmentsAction()
     return { enrollments }
@@ -116,7 +111,10 @@ function StudentEnrollmentPage() {
           </div>
         )}
       </div>
-      <AlertDialog open={!!confirmDrop} onOpenChange={() => setConfirmDrop(null)}>
+      <AlertDialog
+        open={!!confirmDrop}
+        onOpenChange={(open) => !open && setConfirmDrop(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Drop Course</AlertDialogTitle>

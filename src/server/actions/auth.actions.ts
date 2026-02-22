@@ -1,30 +1,37 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
-import { loginSchema, registerSchema, changePasswordSchema, forgotPasswordSchema, resetPasswordSchema } from '@/server/validators/auth.schema'
+import {
+  loginSchema,
+  registerSchema,
+  changePasswordSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from '@/server/validators/auth.schema'
 import { auth } from '@/lib/auth'
 import { authMiddleware } from '@/lib/middleware'
 import type { SessionUser } from '@/types/dto'
 import type { UserRole } from '@/types/roles'
 
+type AuthUser = { id: string; email: string; emailVerified?: boolean | null } & Record<string, unknown>
+
+function toSessionUser(au: AuthUser): SessionUser {
+  return {
+    id: au.id,
+    email: au.email,
+    firstName: au.firstName as string,
+    lastName: au.lastName as string,
+    role: au.role as UserRole,
+    isActive: (au.isActive as boolean) ?? true,
+    emailVerified: au.emailVerified ?? false,
+  }
+}
+
 /** Get current session user via Better-Auth */
 export const getSession = createServerFn({ method: 'GET' }).handler(
   async (): Promise<SessionUser | null> => {
     try {
-      const headers = getRequestHeaders()
-      const session = await auth.api.getSession({ headers })
-
-      if (!session) return null
-
-      const user = session.user as Record<string, unknown>
-      return {
-        id: session.user.id,
-        email: session.user.email,
-        firstName: user.firstName as string,
-        lastName: user.lastName as string,
-        role: user.role as UserRole,
-        isActive: user.isActive as boolean,
-        emailVerified: session.user.emailVerified ?? false,
-      }
+      const session = await auth.api.getSession({ headers: getRequestHeaders() })
+      return session ? toSessionUser(session.user as AuthUser) : null
     } catch {
       return null
     }
@@ -37,22 +44,14 @@ export const loginAction = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     try {
       const result = await auth.api.signInEmail({
-        body: {
-          email: data.email,
-          password: data.password,
-        },
+        body: { email: data.email, password: data.password },
       })
 
       if (!result) {
-        return {
-          success: false as const,
-          error: { code: 'UNAUTHORIZED', message: 'Invalid email or password' },
-        }
+        return { success: false as const, error: { code: 'UNAUTHORIZED', message: 'Invalid email or password' } }
       }
 
-      const user = result.user as Record<string, unknown>
-
-      // Check if user is active
+      const user = result.user as AuthUser
       if (user.isActive === false) {
         return {
           success: false as const,
@@ -60,27 +59,10 @@ export const loginAction = createServerFn({ method: 'POST' })
         }
       }
 
-      return {
-        success: true as const,
-        data: {
-          user: {
-            id: result.user.id,
-            email: result.user.email,
-            firstName: user.firstName as string,
-            lastName: user.lastName as string,
-            role: user.role as UserRole,
-            isActive: user.isActive as boolean,
-            emailVerified: result.user.emailVerified ?? false,
-          },
-        },
-      }
+      return { success: true as const, data: { user: toSessionUser(user) } }
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : 'Invalid email or password'
-      return {
-        success: false as const,
-        error: { code: 'UNAUTHORIZED', message },
-      }
+      const message = error instanceof Error ? error.message : 'Invalid email or password'
+      return { success: false as const, error: { code: 'UNAUTHORIZED', message } }
     }
   })
 
@@ -100,58 +82,32 @@ export const registerAction = createServerFn({ method: 'POST' })
       })
 
       if (!result) {
-        return {
-          success: false as const,
-          error: { code: 'INTERNAL_ERROR', message: 'Registration failed' },
-        }
+        return { success: false as const, error: { code: 'INTERNAL_ERROR', message: 'Registration failed' } }
       }
 
-      const user = result.user as Record<string, unknown>
-
-      return {
-        success: true as const,
-        data: {
-          user: {
-            id: result.user.id,
-            email: result.user.email,
-            firstName: user.firstName as string || data.firstName,
-            lastName: user.lastName as string || data.lastName,
-            role: (user.role as UserRole) || 'STUDENT',
-            isActive: (user.isActive as boolean) ?? true,
-          },
-        },
-      }
+      return { success: true as const, data: { user: toSessionUser(result.user as AuthUser) } }
     } catch (error: unknown) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'An error occurred during registration'
-      // Check for duplicate email
-      if (message.toLowerCase().includes('already') || message.toLowerCase().includes('exist')) {
-        return {
-          success: false as const,
-          error: { code: 'CONFLICT', message: 'An account with this email already exists' },
-        }
-      }
+      const msg = error instanceof Error ? error.message : 'An error occurred during registration'
+      const isConflict = msg.toLowerCase().includes('already') || msg.toLowerCase().includes('exist')
       return {
         success: false as const,
-        error: { code: 'INTERNAL_ERROR', message },
+        error: {
+          code: isConflict ? 'CONFLICT' : 'INTERNAL_ERROR',
+          message: isConflict ? 'An account with this email already exists' : msg,
+        },
       }
     }
   })
 
 /** Logout action via Better-Auth */
-export const logoutAction = createServerFn({ method: 'POST' }).handler(
-  async () => {
-    try {
-      const headers = getRequestHeaders()
-      await auth.api.signOut({ headers })
-      return { success: true }
-    } catch {
-      return { success: true }
-    }
+export const logoutAction = createServerFn({ method: 'POST' }).handler(async () => {
+  try {
+    await auth.api.signOut({ headers: getRequestHeaders() })
+  } catch {
+    /* always succeed to clear client state */
   }
-)
+  return { success: true }
+})
 
 /** Change password action via Better-Auth */
 export const changePasswordAction = createServerFn({ method: 'POST' })
@@ -159,9 +115,8 @@ export const changePasswordAction = createServerFn({ method: 'POST' })
   .inputValidator((data: unknown) => changePasswordSchema.parse(data))
   .handler(async ({ data }) => {
     try {
-      const headers = getRequestHeaders()
       await auth.api.changePassword({
-        headers,
+        headers: getRequestHeaders(),
         body: {
           currentPassword: data.currentPassword,
           newPassword: data.newPassword,
@@ -170,12 +125,8 @@ export const changePasswordAction = createServerFn({ method: 'POST' })
       })
       return { success: true as const }
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : 'Failed to change password'
-      return {
-        success: false as const,
-        error: { code: 'UNAUTHORIZED', message },
-      }
+      const message = error instanceof Error ? error.message : 'Failed to change password'
+      return { success: false as const, error: { code: 'UNAUTHORIZED', message } }
     }
   })
 
@@ -184,19 +135,12 @@ export const forgotPasswordAction = createServerFn({ method: 'POST' })
   .inputValidator((data: unknown) => forgotPasswordSchema.parse(data))
   .handler(async ({ data }) => {
     try {
-      console.log(`[ForgotPassword] Attempting reset for: ${data.email}`)
       await auth.api.requestPasswordReset({
-        body: {
-          email: data.email,
-          redirectTo: '/reset-password',
-        },
+        body: { email: data.email, redirectTo: '/reset-password' },
       })
-      console.log(`[ForgotPassword] Reset request completed for: ${data.email}`)
-    } catch (error) {
-      // Log the error for debugging but don't reveal to user whether email exists
-      console.error('[ForgotPassword] Error:', error)
+    } catch {
+      /* intentionally swallow — don't reveal whether email exists */
     }
-    // Always return success for security (don't reveal whether email exists)
     return {
       success: true as const,
       message: 'If an account exists with that email, a password reset link has been sent.',
@@ -209,25 +153,21 @@ export const resetPasswordAction = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     try {
       await auth.api.resetPassword({
-        body: {
-          token: data.token,
-          newPassword: data.newPassword,
-        },
+        body: { token: data.token, newPassword: data.newPassword },
       })
       return { success: true as const }
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : 'Failed to reset password'
-      // Check for expired/invalid token
-      if (message.toLowerCase().includes('expired') || message.toLowerCase().includes('invalid')) {
-        return {
-          success: false as const,
-          error: { code: 'BAD_REQUEST', message: 'This reset link has expired or is invalid. Please request a new one.' },
-        }
-      }
+      const message = error instanceof Error ? error.message : 'Failed to reset password'
+      const isBadRequest =
+        message.toLowerCase().includes('expired') || message.toLowerCase().includes('invalid')
       return {
         success: false as const,
-        error: { code: 'INTERNAL_ERROR', message },
+        error: {
+          code: isBadRequest ? 'BAD_REQUEST' : 'INTERNAL_ERROR',
+          message: isBadRequest
+            ? 'This reset link has expired or is invalid. Please request a new one.'
+            : message,
+        },
       }
     }
   })
@@ -236,13 +176,10 @@ export const resetPasswordAction = createServerFn({ method: 'POST' })
 export const resendVerificationEmailAction = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .handler(async ({ context }) => {
+    const user = context.user as SessionUser
     try {
-      const user = context.user as SessionUser
       await auth.api.sendVerificationEmail({
-        body: {
-          email: user.email,
-          callbackURL: '/',
-        },
+        body: { email: user.email, callbackURL: '/' },
       })
       return {
         success: true as const,
@@ -251,9 +188,6 @@ export const resendVerificationEmailAction = createServerFn({ method: 'POST' })
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Failed to send verification email'
-      return {
-        success: false as const,
-        error: { code: 'INTERNAL_ERROR', message },
-      }
+      return { success: false as const, error: { code: 'INTERNAL_ERROR', message } }
     }
   })

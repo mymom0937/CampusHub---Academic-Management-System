@@ -42,7 +42,7 @@ function LoginPage() {
       const result = await loginAction({ data })
 
       if (result.success) {
-        toast.success('Welcome back!')
+        toast.success('Welcome Back!')
         const dashboardPath = ROLE_DASHBOARD_PATHS[result.data.user.role]
         navigate({ to: dashboardPath })
       } else {
@@ -112,7 +112,7 @@ function LoginPage() {
                   to="/register"
                   className="text-primary underline-offset-4 hover:underline font-medium"
                 >
-                  Create one
+                  Create One
                 </Link>
               </p>
             </CardFooter>

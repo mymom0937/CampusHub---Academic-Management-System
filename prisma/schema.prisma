@@ -244,6 +244,13 @@ enum NotificationType {
   SYSTEM
 }
 
+enum MediaType {
+  TEXT
+  IMAGE
+  VIDEO
+  AUDIO
+}
+
 model Notification {
   id      String           @id @default(cuid())
   userId  String
@@ -261,16 +268,19 @@ model Notification {
 }
 
 model Announcement {
-  id          String  @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
   content     String
   authorId    String
-  author      User    @relation("AnnouncementAuthor", fields: [authorId], references: [id])
-  targetRole  Role?   // null = all roles
-  isPublished Boolean @default(true)
+  author      User      @relation("AnnouncementAuthor", fields: [authorId], references: [id])
+  targetRole  Role?     // null = all roles
+  isPublished Boolean   @default(true)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  mediaType   MediaType? // TEXT | IMAGE | VIDEO | AUDIO
+  mediaUrl    String?    // URL to media (Cloudinary, YouTube, Vimeo, etc.) — file stored externally
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([isPublished])
   @@index([targetRole])

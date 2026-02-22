@@ -206,6 +206,8 @@ export interface AnnouncementItem {
   targetRole: string | null
   isPublished: boolean
   createdAt: string
+  mediaType?: 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO'
+  mediaUrl?: string | null
 }
 
 /** Course prerequisite DTO */

@@ -1,5 +1,5 @@
-import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
-import { useForm } from 'react-hook-form'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { useState } from 'react'
@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/card'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { getSession } from '@/server/actions/auth.actions'
+import { requireAuth } from '@/lib/admin-route'
 import { changePasswordAction } from '@/server/actions/auth.actions'
 import {
   changePasswordSchema,
@@ -28,11 +28,7 @@ import {
 import type { SessionUser } from '@/types/dto'
 
 export const Route = createFileRoute('/profile/password')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireAuth() }),
   component: ChangePasswordPage,
 })
 
@@ -47,7 +43,7 @@ function ChangePasswordPage() {
     reset,
     formState: { errors },
   } = useForm<ChangePasswordInput>({
-    resolver: zodResolver(changePasswordSchema),
+    resolver: zodResolver(changePasswordSchema) as Resolver<ChangePasswordInput>,
   })
 
   const onSubmit = async (data: ChangePasswordInput) => {

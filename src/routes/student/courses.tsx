@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { BookOpen, CheckCircle, Clock, Search, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
@@ -11,18 +11,13 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { StatsSkeleton } from '@/components/skeletons/CardSkeleton'
-import { getSession } from '@/server/actions/auth.actions'
+import { requireStudent } from '@/lib/admin-route'
 import { getCourseCatalogAction } from '@/server/actions/course.actions'
 import { enrollAction } from '@/server/actions/enrollment.actions'
 import type { SessionUser, CourseListItem } from '@/types/dto'
 
 export const Route = createFileRoute('/student/courses')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    if (user.role !== 'STUDENT') throw redirect({ to: '/dashboard' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireStudent() }),
   loader: async () => {
     const courses = await getCourseCatalogAction({ data: {} })
     return { courses }
@@ -130,7 +125,10 @@ function StudentCourseCatalog() {
           </div>
         )}
       </div>
-      <AlertDialog open={!!confirmCourse} onOpenChange={() => setConfirmCourse(null)}>
+      <AlertDialog
+        open={!!confirmCourse}
+        onOpenChange={(open) => !open && setConfirmCourse(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>

@@ -23,27 +23,26 @@ export function ThemeProvider({
   defaultTheme = 'system',
   storageKey = 'campushub-theme',
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme)
-
-  useEffect(() => {
-    const stored = localStorage.getItem(storageKey) as Theme | null
-    if (stored) setTheme(stored)
-  }, [storageKey])
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === 'undefined') return defaultTheme
+    try {
+      const stored = localStorage.getItem(storageKey) as Theme | null
+      return stored ?? defaultTheme
+    } catch {
+      return defaultTheme
+    }
+  })
 
   useEffect(() => {
     const root = window.document.documentElement
-    root.classList.remove('light', 'dark')
+    const resolved = theme === 'system'
+      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : theme
 
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
-        .matches
-        ? 'dark'
-        : 'light'
-      root.classList.add(systemTheme)
-      return
+    if (!root.classList.contains(resolved)) {
+      root.classList.remove('light', 'dark')
+      root.classList.add(resolved)
     }
-
-    root.classList.add(theme)
   }, [theme])
 
   const value = {

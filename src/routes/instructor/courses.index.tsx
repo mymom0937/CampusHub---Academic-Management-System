@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { BookOpen, Users } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -7,24 +7,21 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { StatsSkeleton } from '@/components/skeletons/CardSkeleton'
-import { getSession } from '@/server/actions/auth.actions'
+import { requireInstructor } from '@/lib/admin-route'
 import { getInstructorCoursesAction } from '@/server/actions/course.actions'
 import type { SessionUser, CourseListItem } from '@/types/dto'
 
 export const Route = createFileRoute('/instructor/courses/')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    if (user.role !== 'INSTRUCTOR') throw redirect({ to: '/dashboard' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireInstructor() }),
   loader: async () => {
     const courses = await getInstructorCoursesAction()
     return { courses }
   },
-  pendingComponent: () => {
-    return <div className="p-8"><StatsSkeleton count={4} /></div>
-  },
+  pendingComponent: () => (
+    <div className="p-8">
+      <StatsSkeleton count={4} />
+    </div>
+  ),
   component: InstructorCoursesPage,
 })
 

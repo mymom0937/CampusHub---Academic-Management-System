@@ -176,29 +176,6 @@ export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
 
       {/* Navigation Groups */}
       <nav className="flex-1 overflow-y-auto p-3 space-y-4">
-        {/* Home link - back to landing */}
-        <div>
-          {!collapsed && (
-            <p className="px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
-              App
-            </p>
-          )}
-          <div className="space-y-0.5">
-            <Link
-              to="/"
-              className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                location.pathname === '/'
-                  ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-              )}
-              title={collapsed ? 'Home' : undefined}
-            >
-              <span className="shrink-0"><Home className="h-5 w-5" /></span>
-              {!collapsed && <span className="truncate">Home</span>}
-            </Link>
-          </div>
-        </div>
         {navGroups.map((group) => (
           <div key={group.title}>
             {!collapsed && (
@@ -266,15 +243,16 @@ export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
           )
         })}
 
-        {/* Help link */}
-        <a
-          href="#"
+        {/* Help link - routes to home contact section */}
+        <Link
+          to="/"
+          hash="contact"
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
           title={collapsed ? 'Help & Support' : undefined}
         >
           <span className="shrink-0"><HelpCircle className="h-5 w-5" /></span>
           {!collapsed && <span className="truncate">Help & Support</span>}
-        </a>
+        </Link>
 
         {/* Version badge */}
         {!collapsed && (

@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import type { NotificationType, Role } from '../../../generated/prisma/client'
+import type { NotificationType, Role, MediaType } from '../../../generated/prisma/client'
 
 /** Get notifications for a user */
 export async function getUserNotifications(
@@ -88,6 +88,8 @@ export async function createAnnouncement(data: {
   authorId: string
   targetRole?: Role | null
   isPublished?: boolean
+  mediaType?: MediaType | null
+  mediaUrl?: string | null
 }) {
   return prisma.announcement.create({ data })
 }
@@ -100,6 +102,8 @@ export async function updateAnnouncement(
     content?: string
     targetRole?: Role | null
     isPublished?: boolean
+    mediaType?: MediaType | null
+    mediaUrl?: string | null
   }
 ) {
   return prisma.announcement.update({

@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -58,7 +58,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { FormSkeleton } from '@/components/skeletons/FormSkeleton'
 
-import { getSession } from '@/server/actions/auth.actions'
+import { requireAdmin } from '@/lib/admin-route'
 import {
   getCourseDetailAction,
   updateCourseAction,
@@ -77,12 +77,7 @@ import {
 import type { SessionUser, CourseListItem, PrerequisiteItem } from '@/types/dto'
 
 export const Route = createFileRoute('/admin/courses/$id')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    if (user.role !== 'ADMIN') throw redirect({ to: '/dashboard' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireAdmin() }),
   loader: async ({ params }) => {
     const [course, instructors] = await Promise.all([
       getCourseDetailAction({ data: { id: params.id } }),

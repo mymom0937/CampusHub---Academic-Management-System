@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { BookOpen, ClipboardList, GraduationCap, TrendingUp, FileText, BarChart3 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -7,17 +7,12 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { AcademicStandingAlert } from '@/components/AcademicStandingAlert'
 import { StatsSkeleton } from '@/components/skeletons/CardSkeleton'
-import { getSession } from '@/server/actions/auth.actions'
+import { requireStudent } from '@/lib/admin-route'
 import { getStudentDashboardAction } from '@/server/actions/dashboard.actions'
 import type { SessionUser } from '@/types/dto'
 
 export const Route = createFileRoute('/student/')({
-  beforeLoad: async () => {
-    const user = await getSession()
-    if (!user) throw redirect({ to: '/login' })
-    if (user.role !== 'STUDENT') throw redirect({ to: '/dashboard' })
-    return { user }
-  },
+  beforeLoad: async () => ({ user: await requireStudent() }),
   loader: async () => {
     const stats = await getStudentDashboardAction()
     return { stats }
@@ -45,7 +40,7 @@ function StudentDashboard() {
 
   return (
     <DashboardLayout user={user}>
-      <Breadcrumb items={[{ label: 'Student' }, { label: 'Dashboard' }]} />
+      <Breadcrumb items={[{ label: 'Student', href: '/student' }, { label: 'Dashboard' }]} />
       <div className="space-y-6 min-w-0">
         <div className="min-w-0">
           <h1 className="text-2xl font-bold tracking-tight break-words sm:text-3xl">Student Dashboard</h1>

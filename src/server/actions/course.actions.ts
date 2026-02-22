@@ -9,7 +9,7 @@ import {
   updateSemesterSchema,
   courseListFiltersSchema,
 } from '@/server/validators/course.schema'
-import { isAppError, toAppError } from '@/server/errors/AppError'
+import { toAppError } from '@/server/errors/AppError'
 import type { SessionUser } from '@/types/dto'
 
 // ============================================================
