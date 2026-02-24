@@ -50,6 +50,7 @@ const adminNav: NavGroup[] = [
       { label: 'Users', href: '/admin/users', icon: <Users className="h-5 w-5" /> },
       { label: 'Courses', href: '/admin/courses', icon: <BookOpen className="h-5 w-5" /> },
       { label: 'Semesters', href: '/admin/semesters', icon: <Calendar className="h-5 w-5" /> },
+      { label: 'Transcripts', href: '/admin/transcripts', icon: <FileText className="h-5 w-5" /> },
     ],
   },
   {
@@ -72,6 +73,7 @@ const instructorNav: NavGroup[] = [
     title: 'Teaching',
     items: [
       { label: 'My Courses', href: '/instructor/courses', icon: <BookOpen className="h-5 w-5" /> },
+      { label: 'Transcripts', href: '/instructor/transcripts', icon: <FileText className="h-5 w-5" /> },
       { label: 'Calendar', href: '/instructor/calendar', icon: <Calendar className="h-5 w-5" /> },
     ],
   },

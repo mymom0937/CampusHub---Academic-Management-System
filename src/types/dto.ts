@@ -108,12 +108,26 @@ export interface StudentGradeEntry {
   grade: string | null
   gradePoints: number | null
   gradedAt: string | null
+  /** Instructor name who graded (display only) */
+  gradedByName?: string | null
+  /** Assessment scores: assessmentId -> { score, maxScore } */
+  assessmentScores?: Record<string, { score: number | null; maxScore: number }>
 }
 
-/** Transcript entry */
+/** Course assessment item */
+export interface CourseAssessmentItem {
+  id: string
+  name: string
+  weight: number
+  maxScore: number
+  sortOrder: number
+}
+
+/** Transcript entry (semester-focused grade report) */
 export interface TranscriptEntry {
   semesterName: string
   semesterCode: string
+  semesterStartDate: string
   courses: Array<{
     courseCode: string
     courseName: string
@@ -122,8 +136,24 @@ export interface TranscriptEntry {
     gradePoints: number | null
     status: string
   }>
-  semesterGpa: number | null
+  /** Semester totals (overall for that semester) */
   semesterCredits: number
+  semesterGradePoints: number
+  semesterGpa: number | null
+}
+
+/** Cumulative progression for grade report summary */
+export interface CumulativeProgression {
+  previousTotalCredits: number
+  previousTotalGradePoints: number
+  previousGpa: number | null
+  lastSemesterCredits: number
+  lastSemesterGradePoints: number
+  lastSemesterGpa: number | null
+  cumulativeCredits: number
+  cumulativeGradePoints: number
+  cumulativeGpa: number | null
+  academicStatus: string
 }
 
 /** GPA summary */
@@ -132,6 +162,8 @@ export interface GpaSummary {
   totalCredits: number
   totalGradePoints: number
   academicStanding: string
+  /** Progression for grade report (Previous Total → Semester Total → Cumulative) */
+  progression?: CumulativeProgression
 }
 
 /** Dashboard stats */

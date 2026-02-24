@@ -110,7 +110,7 @@ function ForgotPasswordPage() {
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4">
                   <Button type="submit" className="w-full" loading={loading}>
-                    Send Reset Link
+                    {loading ? 'Sending reset link…' : 'Send Reset Link'}
                   </Button>
                   <p className="text-sm text-center text-muted-foreground">
                     Remember your password?{' '}

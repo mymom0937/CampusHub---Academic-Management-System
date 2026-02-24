@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { SocialLoginButtons } from '@/components/auth/SocialLoginButtons'
 import { loginSchema, type LoginInput } from '@/server/validators/auth.schema'
 import { loginAction, getSession } from '@/server/actions/auth.actions'
 import { ROLE_DASHBOARD_PATHS } from '@/types/roles'
@@ -103,8 +104,9 @@ function LoginPage() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
+              <SocialLoginButtons />
               <Button type="submit" className="w-full" loading={loading}>
-                Sign In
+                {loading ? 'Signing in…' : 'Sign In'}
               </Button>
               <p className="text-sm text-center text-muted-foreground">
                 Don&apos;t have an account?{' '}

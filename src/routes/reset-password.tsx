@@ -173,7 +173,7 @@ function ResetPasswordPage() {
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button type="submit" className="w-full" loading={loading}>
-                Reset Password
+                {loading ? 'Resetting password…' : 'Reset Password'}
               </Button>
               <p className="text-sm text-center text-muted-foreground">
                 Remember your password?{' '}

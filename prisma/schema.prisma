@@ -162,6 +162,7 @@ model Course {
   // Relations
   enrollments           Enrollment[]
   instructorAssignments InstructorAssignment[]
+  assessments           CourseAssessment[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -169,6 +170,34 @@ model Course {
 
   @@unique([code, semesterId])
   @@index([semesterId])
+}
+
+model CourseAssessment {
+  id        String @id @default(cuid())
+  courseId  String
+  course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  name      String
+  weight    Int    // percentage weight (e.g., 15 for 15%)
+  maxScore  Int    @default(100) // max points for this assessment
+  sortOrder Int    @default(0)
+
+  scores EnrollmentAssessmentScore[]
+
+  @@unique([courseId, name])
+  @@index([courseId])
+}
+
+model EnrollmentAssessmentScore {
+  id           String @id @default(cuid())
+  enrollmentId String
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  assessmentId String
+  assessment   CourseAssessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  score       Float?
+  maxScore    Float?  // override per-entry if needed
+
+  @@unique([enrollmentId, assessmentId])
+  @@index([enrollmentId])
 }
 
 model InstructorAssignment {
@@ -208,6 +237,8 @@ model Enrollment {
   gradePoints Float?
   gradedAt    DateTime?
   gradedBy    String?
+
+  assessmentScores EnrollmentAssessmentScore[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

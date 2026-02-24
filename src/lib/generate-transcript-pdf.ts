@@ -83,29 +83,20 @@ export function generateTranscriptPdf({ user, entries, summary }: TranscriptPdfD
   doc.line(14, y, pageWidth - 14, y)
   y += 6
 
-  // ─── Semester Sections ───────────────────────────────────
+  // ─── Semester Sections (Grade Report: semester as primary unit) ────────────
   for (const entry of entries) {
-    // Check if we need a new page (leave room for header + at least a few rows)
     if (y > 250) {
       doc.addPage()
       y = 15
     }
 
-    // Semester header
     doc.setFontSize(11)
     doc.setFont('helvetica', 'bold')
     doc.text(`${entry.semesterName} (${entry.semesterCode})`, 14, y)
+    y += 6
 
-    if (entry.semesterGpa !== null) {
-      doc.setFontSize(10)
-      doc.setFont('helvetica', 'normal')
-      const gpaText = `Semester GPA: ${entry.semesterGpa.toFixed(3)}`
-      doc.text(gpaText, pageWidth - 14, y, { align: 'right' })
-    }
-    y += 2
-
-    // Course table
-    const tableData = entry.courses.map((course) => [
+    // Course table with Totals row (semester overall)
+    const courseRows = entry.courses.map((course) => [
       course.courseCode,
       course.courseName,
       String(course.credits),
@@ -114,10 +105,18 @@ export function generateTranscriptPdf({ user, entries, summary }: TranscriptPdfD
         ? course.gradePoints.toFixed(2)
         : '-',
     ])
+    const totalsRow = [
+      'Totals',
+      '',
+      String(entry.semesterCredits),
+      '',
+      entry.semesterGradePoints.toFixed(2),
+    ]
+    const tableData = [...courseRows, totalsRow]
 
     autoTable(doc, {
       startY: y,
-      head: [['Code', 'Course Name', 'Credits', 'Grade', 'Points']],
+      head: [['Code', 'Course Title', 'Credit Hr', 'Grade', 'Grade Point']],
       body: tableData,
       theme: 'striped',
       headStyles: {
@@ -130,15 +129,14 @@ export function generateTranscriptPdf({ user, entries, summary }: TranscriptPdfD
         fontSize: 9,
       },
       columnStyles: {
-        0: { cellWidth: 25, fontStyle: 'bold' },
+        0: { cellWidth: 28, fontStyle: 'bold' },
         1: { cellWidth: 'auto' },
-        2: { cellWidth: 20, halign: 'center' },
-        3: { cellWidth: 20, halign: 'center' },
-        4: { cellWidth: 20, halign: 'center' },
+        2: { cellWidth: 24, halign: 'center' },
+        3: { cellWidth: 22, halign: 'center' },
+        4: { cellWidth: 28, halign: 'center' },
       },
       margin: { left: 14, right: 14 },
       didDrawPage: () => {
-        // footer on each page
         doc.setFontSize(8)
         doc.setFont('helvetica', 'italic')
         doc.setTextColor(150)
@@ -152,21 +150,22 @@ export function generateTranscriptPdf({ user, entries, summary }: TranscriptPdfD
       },
     })
 
-    // Get the final Y position from autotable
-    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 4
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 2
 
-    // Semester credits summary
+    // Semester GPA (overall for that semester)
     doc.setFontSize(9)
+    doc.setFont('helvetica', 'bold')
+    doc.text(
+      `Semester GPA: ${entry.semesterGpa !== null ? entry.semesterGpa.toFixed(2) : 'N/A'}`,
+      pageWidth - 14,
+      y,
+      { align: 'right' }
+    )
     doc.setFont('helvetica', 'normal')
-    doc.setTextColor(100)
-    doc.text(`Semester Credits: ${entry.semesterCredits}`, pageWidth - 14, y, {
-      align: 'right',
-    })
-    doc.setTextColor(0)
-    y += 8
+    y += 10
   }
 
-  // ─── Cumulative Summary ──────────────────────────────────
+  // ─── Academic Summary (Previous Total → Semester Total → Cumulative) ──────
   if (y > 240) {
     doc.addPage()
     y = 15
@@ -179,29 +178,54 @@ export function generateTranscriptPdf({ user, entries, summary }: TranscriptPdfD
 
   doc.setFontSize(12)
   doc.setFont('helvetica', 'bold')
-  doc.text('Cumulative Summary', 14, y)
+  doc.text('Academic Summary', 14, y)
   y += 7
 
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
-
-  const summaryRows = [
-    ['Total Credits Attempted', String(summary.totalCredits)],
-    [
-      'Cumulative GPA',
-      summary.cumulativeGpa !== null ? summary.cumulativeGpa.toFixed(3) : 'N/A',
-    ],
-    ['Academic Standing', summary.academicStanding],
-  ]
+  const prog = summary.progression
+  const summaryRows: string[][] = prog
+    ? [
+        [
+          'Previous Total',
+          String(prog.previousTotalCredits),
+          prog.previousTotalGradePoints.toFixed(2),
+          prog.previousGpa !== null ? prog.previousGpa.toFixed(2) : 'N/A',
+        ],
+        [
+          'Semester Total',
+          String(prog.lastSemesterCredits),
+          prog.lastSemesterGradePoints.toFixed(2),
+          prog.lastSemesterGpa !== null ? prog.lastSemesterGpa.toFixed(2) : 'N/A',
+        ],
+        [
+          'Cumulative Average',
+          String(prog.cumulativeCredits),
+          prog.cumulativeGradePoints.toFixed(2),
+          prog.cumulativeGpa !== null ? prog.cumulativeGpa.toFixed(2) : 'N/A',
+        ],
+        ['Academic Status', prog.academicStatus, '', ''],
+      ]
+    : [
+        ['Total Credits', String(summary.totalCredits), String(summary.totalGradePoints), summary.cumulativeGpa !== null ? summary.cumulativeGpa.toFixed(2) : 'N/A'],
+        ['Academic Status', summary.academicStanding, '', ''],
+      ]
 
   autoTable(doc, {
     startY: y,
+    head: [['', 'Credit Hours', 'Grade Points', 'GPA']],
     body: summaryRows,
     theme: 'plain',
+    headStyles: {
+      fillColor: [59, 130, 246],
+      textColor: 255,
+      fontStyle: 'bold',
+      fontSize: 9,
+    },
     bodyStyles: { fontSize: 10 },
     columnStyles: {
-      0: { fontStyle: 'bold', cellWidth: 60 },
-      1: { halign: 'left' },
+      0: { fontStyle: 'bold', cellWidth: 50 },
+      1: { cellWidth: 35, halign: 'center' },
+      2: { cellWidth: 35, halign: 'center' },
+      3: { cellWidth: 30, halign: 'center' },
     },
     margin: { left: 14, right: 14 },
   })

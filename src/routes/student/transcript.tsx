@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Download, FileText } from 'lucide-react'
+import { Download, FileText, Printer } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -44,6 +44,8 @@ function StudentTranscriptPage() {
     }
   }
 
+  const handlePrint = () => window.print()
+
   return (
     <DashboardLayout user={user}>
       <Breadcrumb
@@ -62,10 +64,16 @@ function StudentTranscriptPage() {
             </p>
           </div>
           {entries.length > 0 && (
-            <Button onClick={handleDownloadPdf} variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Export PDF
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={handlePrint} variant="outline">
+                <Printer className="h-4 w-4 mr-2" />
+                Print
+              </Button>
+              <Button onClick={handleDownloadPdf} variant="outline">
+                <Download className="h-4 w-4 mr-2" />
+                Export PDF
+              </Button>
+            </div>
           )}
         </div>
 
@@ -138,6 +146,12 @@ function StudentTranscriptPage() {
                 </div>
               </CardHeader>
               <CardContent>
+                <div className="grid grid-cols-4 gap-4 text-xs text-muted-foreground font-medium mb-2">
+                  <span>Code</span>
+                  <span>Course Title</span>
+                  <span className="text-center">Credit Hr</span>
+                  <span className="text-right">Grade · Points</span>
+                </div>
                 <div className="space-y-2">
                   {entry.courses.map((course) => (
                     <div
@@ -163,19 +177,22 @@ function StudentTranscriptPage() {
                             -
                           </Badge>
                         )}
+                        <span className="text-sm text-muted-foreground w-12 text-right">
+                          {course.gradePoints !== null && course.gradePoints !== undefined
+                            ? course.gradePoints.toFixed(2)
+                            : '-'}
+                        </span>
                       </div>
                     </div>
                   ))}
                 </div>
                 <Separator className="my-3" />
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    Credits: {entry.semesterCredits}
+                <div className="flex justify-between text-sm font-medium">
+                  <span>
+                    Totals: {entry.semesterCredits} cr · {entry.semesterGradePoints.toFixed(2)} pts
                   </span>
                   {entry.semesterGpa !== null && (
-                    <span className="font-medium">
-                      Semester GPA: {entry.semesterGpa.toFixed(3)}
-                    </span>
+                    <span>Semester GPA: {entry.semesterGpa.toFixed(2)}</span>
                   )}
                 </div>
               </CardContent>
@@ -183,26 +200,59 @@ function StudentTranscriptPage() {
           ))
         )}
 
-        {/* Summary */}
+        {/* Academic Summary */}
         {entries.length > 0 && (
           <Card className="bg-muted/30">
-            <CardContent className="pt-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-lg font-semibold">Cumulative Summary</p>
-                  <p className="text-sm text-muted-foreground">
-                    Total Credits: {summary.totalCredits}
-                  </p>
+            <CardHeader>
+              <CardTitle className="text-lg">Academic Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {summary.progression ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-4 gap-4 text-sm">
+                    <span className="text-muted-foreground font-medium"></span>
+                    <span className="text-center font-medium">Credit Hrs</span>
+                    <span className="text-center font-medium">Grade Pts</span>
+                    <span className="text-center font-medium">GPA</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-4 text-sm">
+                    <span className="text-muted-foreground">Previous Total</span>
+                    <span className="text-center">{summary.progression.previousTotalCredits}</span>
+                    <span className="text-center">{summary.progression.previousTotalGradePoints.toFixed(2)}</span>
+                    <span className="text-center">{summary.progression.previousGpa !== null ? summary.progression.previousGpa.toFixed(2) : 'N/A'}</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-4 text-sm">
+                    <span className="text-muted-foreground">Semester Total</span>
+                    <span className="text-center">{summary.progression.lastSemesterCredits}</span>
+                    <span className="text-center">{summary.progression.lastSemesterGradePoints.toFixed(2)}</span>
+                    <span className="text-center">{summary.progression.lastSemesterGpa !== null ? summary.progression.lastSemesterGpa.toFixed(2) : 'N/A'}</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-4 text-sm font-medium">
+                    <span className="text-muted-foreground">Cumulative Average</span>
+                    <span className="text-center">{summary.progression.cumulativeCredits}</span>
+                    <span className="text-center">{summary.progression.cumulativeGradePoints.toFixed(2)}</span>
+                    <span className="text-center">{summary.progression.cumulativeGpa !== null ? summary.progression.cumulativeGpa.toFixed(2) : 'N/A'}</span>
+                  </div>
+                  <div className="pt-2">
+                    <span className="text-muted-foreground">Academic Status: </span>
+                    <Badge variant={summary.progression.academicStatus === 'Promoted' ? 'success' : 'destructive'}>
+                      {summary.progression.academicStatus}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Cumulative GPA</p>
-                  <p className="text-3xl font-bold">
-                    {summary.cumulativeGpa !== null
-                      ? summary.cumulativeGpa.toFixed(3)
-                      : 'N/A'}
-                  </p>
+              ) : (
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Credits: {summary.totalCredits}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-muted-foreground">Cumulative GPA</p>
+                    <p className="text-2xl font-bold">
+                      {summary.cumulativeGpa !== null ? summary.cumulativeGpa.toFixed(3) : 'N/A'}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         )}

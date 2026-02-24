@@ -1,10 +1,48 @@
 import { createServerFn } from '@tanstack/react-start'
-import { instructorMiddleware, studentMiddleware } from '@/lib/middleware'
+import { instructorMiddleware, staffMiddleware, studentMiddleware } from '@/lib/middleware'
 import * as gradeService from '@/server/services/grade.service'
 import * as gpaService from '@/server/services/gpa.service'
 import { submitGradeSchema, bulkGradeSchema } from '@/server/validators/enrollment.schema'
+import { saveAssessmentsSchema, saveScoresSchema } from '@/server/validators/assessment.schema'
 import { toAppError } from '@/server/errors/AppError'
 import type { SessionUser } from '@/types/dto'
+
+/** Get full grading data: assessments + students with scores (instructor) */
+export const getCourseGradingDataAction = createServerFn({ method: 'GET' })
+  .middleware([instructorMiddleware])
+  .inputValidator((data: unknown) => {
+    const parsed = data as { courseId: string }
+    if (!parsed.courseId) throw new Error('Course ID is required')
+    return parsed
+  })
+  .handler(async ({ data, context }) => {
+    const user = context.user as SessionUser
+    return gradeService.getCourseGradingData(user.id, data.courseId)
+  })
+
+/** Save course assessment weights (instructor) */
+export const saveCourseAssessmentsAction = createServerFn({ method: 'POST' })
+  .middleware([instructorMiddleware])
+  .inputValidator((data: unknown) => saveAssessmentsSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    const user = context.user as SessionUser
+    const assessments = await gradeService.saveCourseAssessments(
+      user.id,
+      data.courseId,
+      data.assessments.map((a) => ({ name: a.name, weight: a.weight, maxScore: a.maxScore }))
+    )
+    return { success: true as const, data: { assessments } }
+  })
+
+/** Save assessment scores for a student (instructor) */
+export const saveAssessmentScoresAction = createServerFn({ method: 'POST' })
+  .middleware([instructorMiddleware])
+  .inputValidator((data: unknown) => saveScoresSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    const user = context.user as SessionUser
+    await gradeService.saveAssessmentScores(user.id, data.enrollmentId, data.scores)
+    return { success: true as const }
+  })
 
 /** Submit grade (instructor) */
 export const submitGradeAction = createServerFn({ method: 'POST' })
@@ -55,12 +93,33 @@ export const getCourseGradesAction = createServerFn({ method: 'GET' })
     return gradeService.getCourseStudentGrades(user.id, data.courseId)
   })
 
-/** Get student transcript */
+/** Get students in instructor's courses (for transcript page) */
+export const getInstructorStudentsAction = createServerFn({ method: 'GET' })
+  .middleware([instructorMiddleware])
+  .handler(async ({ context }) => {
+    const user = context.user as SessionUser
+    return gradeService.getInstructorStudents(user.id)
+  })
+
+/** Get student transcript (student: own only) */
 export const getTranscriptAction = createServerFn({ method: 'GET' })
   .middleware([studentMiddleware])
   .handler(async ({ context }) => {
     const user = context.user as SessionUser
     return gpaService.getTranscript(user.id)
+  })
+
+/** Get a specific student's transcript (admin/instructor only). Instructors may only view students in their courses. */
+export const getStudentTranscriptAction = createServerFn({ method: 'POST' })
+  .middleware([staffMiddleware])
+  .inputValidator((data: unknown) => {
+    const parsed = data as { studentId: string }
+    if (!parsed?.studentId) throw new Error('Student ID is required')
+    return parsed
+  })
+  .handler(async ({ data, context }) => {
+    const user = context.user as SessionUser
+    return gpaService.getStudentTranscriptForStaff(user.id, user.role, data.studentId)
   })
 
 /** Bulk grade submission (instructor) */

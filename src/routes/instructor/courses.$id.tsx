@@ -170,6 +170,7 @@ function InstructorCourseDetailPage() {
                       <TableHead>Email</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Grade</TableHead>
+                      <TableHead>Graded by</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -203,6 +204,9 @@ function InstructorCourseDetailPage() {
                             </span>
                           )}
                         </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {s.gradedByName ?? '-'}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -211,6 +215,7 @@ function InstructorCourseDetailPage() {
             )}
           </CardContent>
         </Card>
+
       </div>
     </DashboardLayout>
   )

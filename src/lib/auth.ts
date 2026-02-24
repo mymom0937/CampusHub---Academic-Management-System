@@ -18,10 +18,50 @@ async function sendEmail(to: string, subject: string, html: string, logContext: 
   console.log(`[Email] ${logContext} sent to ${to}${data?.id ? ` (ID: ${data.id})` : ''}`)
 }
 
+/** Split full name into first and last (for providers that only give name) */
+function splitName(fullName: string): { firstName: string; lastName: string } {
+  const parts = fullName?.trim().split(/\s+/) ?? []
+  if (parts.length === 0) return { firstName: 'User', lastName: '' }
+  if (parts.length === 1) return { firstName: parts[0], lastName: '' }
+  return {
+    firstName: parts[0],
+    lastName: parts.slice(1).join(' '),
+  }
+}
+
 /** Better-Auth server instance */
 export const auth = betterAuth({
   baseURL: APP_URL,
   database: prismaAdapter(prisma, { provider: 'postgresql' }),
+  socialProviders: {
+    ...(process.env.GOOGLE_CLIENT_ID &&
+      process.env.GOOGLE_CLIENT_SECRET && {
+        google: {
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          mapProfileToUser: (profile) => {
+            const p = (profile ?? {}) as { given_name?: string; family_name?: string; name?: string }
+            const firstName = p.given_name ?? 'User'
+            const lastName = p.family_name ?? ''
+            const name = (`${firstName} ${lastName}`.trim() || p.name) ?? 'User'
+            return { name, firstName, lastName }
+          },
+        },
+      }),
+    ...(process.env.GITHUB_CLIENT_ID &&
+      process.env.GITHUB_CLIENT_SECRET && {
+        github: {
+          clientId: process.env.GITHUB_CLIENT_ID,
+          clientSecret: process.env.GITHUB_CLIENT_SECRET,
+          mapProfileToUser: (profile) => {
+            const fullName = ((profile ?? {}) as { name?: string }).name ?? ''
+            const { firstName, lastName } = splitName(fullName)
+            const name = fullName || 'User'
+            return { name, firstName: firstName || 'User', lastName }
+          },
+        },
+      }),
+  },
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
