@@ -1,10 +1,10 @@
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { GraduationCap } from 'lucide-react'
 import { toast } from 'sonner'
 import { useState } from 'react'
 
+import { AuthLayout } from '@/components/layout/AuthLayout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
@@ -57,15 +57,8 @@ function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
+    <AuthLayout>
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-4">
-            <GraduationCap className="h-8 w-8" />
-            <span className="font-bold text-2xl">CampusHub</span>
-          </Link>
-        </div>
-
         <Card>
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">Sign In</CardTitle>
@@ -121,6 +114,6 @@ function LoginPage() {
           </form>
         </Card>
       </div>
-    </div>
+    </AuthLayout>
   )
 }

@@ -177,7 +177,7 @@ export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
       </div>
 
       {/* Navigation Groups */}
-      <nav className="flex-1 overflow-y-auto p-3 space-y-4">
+      <nav className="flex-1 overflow-y-auto p-3 space-y-4 font-nav">
         {navGroups.map((group) => (
           <div key={group.title}>
             {!collapsed && (

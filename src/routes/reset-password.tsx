@@ -1,10 +1,11 @@
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { GraduationCap, ShieldCheck, AlertTriangle } from 'lucide-react'
+import { ShieldCheck, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { useState } from 'react'
 
+import { AuthLayout } from '@/components/layout/AuthLayout'
 import { Button } from '@/components/ui/button'
 import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
@@ -67,14 +68,8 @@ function ResetPasswordPage() {
   // No token provided
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
+      <AuthLayout>
         <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <Link to="/" className="inline-flex items-center gap-2 mb-4">
-              <GraduationCap className="h-8 w-8" />
-              <span className="font-bold text-2xl">CampusHub</span>
-            </Link>
-          </div>
           <Card>
             <CardHeader className="space-y-1 text-center">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
@@ -95,21 +90,15 @@ function ResetPasswordPage() {
             </CardFooter>
           </Card>
         </div>
-      </div>
+      </AuthLayout>
     )
   }
 
   // Success state
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
+      <AuthLayout>
         <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <Link to="/" className="inline-flex items-center gap-2 mb-4">
-              <GraduationCap className="h-8 w-8" />
-              <span className="font-bold text-2xl">CampusHub</span>
-            </Link>
-          </div>
           <Card>
             <CardHeader className="space-y-1 text-center">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10">
@@ -127,21 +116,14 @@ function ResetPasswordPage() {
             </CardFooter>
           </Card>
         </div>
-      </div>
+      </AuthLayout>
     )
   }
 
   // Reset form
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
+    <AuthLayout>
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-4">
-            <GraduationCap className="h-8 w-8" />
-            <span className="font-bold text-2xl">CampusHub</span>
-          </Link>
-        </div>
-
         <Card>
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">Reset Password</CardTitle>
@@ -188,6 +170,6 @@ function ResetPasswordPage() {
           </form>
         </Card>
       </div>
-    </div>
+    </AuthLayout>
   )
 }

@@ -1,6 +1,13 @@
 /** Support contact */
 export const SUPPORT_EMAIL = 'support@campushub.com'
+
+/** Social links (update with your org's profiles) */
 export const GITHUB_URL = 'https://github.com'
+export const TWITTER_URL = 'https://twitter.com'
+export const LINKEDIN_URL = 'https://linkedin.com'
+export const FACEBOOK_URL = 'https://facebook.com'
+export const INSTAGRAM_URL = 'https://instagram.com'
+export const YOUTUBE_URL = 'https://youtube.com'
 
 /** Maximum credits a student can enroll in per semester (uniportal_docs.txt) */
 export const MAX_CREDITS_PER_SEMESTER = 18
