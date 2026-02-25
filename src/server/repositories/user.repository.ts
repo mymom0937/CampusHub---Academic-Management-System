@@ -26,6 +26,36 @@ export async function createUser(data: {
   return prisma.user.create({ data })
 }
 
+/** Create user + credential account (admin creates users without signing in) */
+export async function createUserWithAccount(data: {
+  email: string
+  password: string // already hashed
+  firstName: string
+  lastName: string
+  role: Role
+}) {
+  const user = await prisma.user.create({
+    data: {
+      name: `${data.firstName} ${data.lastName}`,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      role: data.role,
+      isActive: true,
+      emailVerified: false,
+    },
+  })
+  await prisma.account.create({
+    data: {
+      userId: user.id,
+      accountId: user.id,
+      providerId: 'credential',
+      password: data.password,
+    },
+  })
+  return user
+}
+
 /** Update a user */
 export async function updateUser(
   id: string,

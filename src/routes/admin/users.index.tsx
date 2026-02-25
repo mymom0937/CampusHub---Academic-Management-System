@@ -2,11 +2,12 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Plus, Search, UserCog } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Search, UserCog } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -36,7 +37,7 @@ import type { PaginatedData } from '@/types/api'
 export const Route = createFileRoute('/admin/users/')({
   beforeLoad: async () => ({ user: await requireAdmin() }),
   loader: async () => {
-    const data = await listUsersAction({ data: { page: 1, pageSize: 20 } })
+    const data = await listUsersAction({ data: { page: 1, pageSize: 10 } })
     return { users: data }
   },
   pendingComponent: () => (
@@ -51,10 +52,12 @@ function AdminUsersPage() {
   const { users: initialData } = Route.useLoaderData()
   const { user } = Route.useRouteContext() as { user: SessionUser }
   const [users, setUsers] = useState<PaginatedData<UserListItem>>(initialData)
+  const [currentPage, setCurrentPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [creating, setCreating] = useState(false)
   const [confirmToggle, setConfirmToggle] = useState<UserListItem | null>(null)
+  const PAGE_SIZE = 10
 
   const {
     register,
@@ -67,12 +70,15 @@ function AdminUsersPage() {
     defaultValues: { role: 'STUDENT' },
   })
 
-  const handleSearch = async () => {
+  const fetchUsers = async (page: number) => {
     const data = await listUsersAction({
-      data: { page: 1, pageSize: 20, search: searchQuery || undefined },
+      data: { page, pageSize: PAGE_SIZE, search: searchQuery || undefined },
     })
     setUsers(data)
+    setCurrentPage(page)
   }
+
+  const handleSearch = () => fetchUsers(1)
 
   const handleCreate = async (data: CreateUserInput) => {
     setCreating(true)
@@ -82,7 +88,7 @@ function AdminUsersPage() {
         toast.success('User created successfully')
         setDialogOpen(false)
         reset()
-        handleSearch()
+        await fetchUsers(1)
       } else {
         toast.error(result.error.message)
       }
@@ -99,7 +105,7 @@ function AdminUsersPage() {
     })
     if (result.success) {
       toast.success(`User ${u.isActive ? 'deactivated' : 'activated'}`)
-      handleSearch()
+      fetchUsers(currentPage)
     } else {
       toast.error(result.error.message)
     }
@@ -164,7 +170,7 @@ function AdminUsersPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Password</Label>
-                    <Input type="password" {...register('password')} error={errors.password?.message} />
+                    <PasswordInput {...register('password')} error={errors.password?.message} />
                   </div>
                   <div className="space-y-2">
                     <Label>Role</Label>
@@ -185,7 +191,7 @@ function AdminUsersPage() {
                 </div>
                 <DialogFooter>
                   <Button type="submit" loading={creating}>
-                    Create User
+                    {creating ? 'Creating User…' : 'Create User'}
                   </Button>
                 </DialogFooter>
               </form>
@@ -270,9 +276,36 @@ function AdminUsersPage() {
           </div>
         )}
 
-        {/* Pagination info */}
-        <div className="text-sm text-muted-foreground">
-          Showing {users.items.length} of {users.total} users
+        {/* Pagination */}
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-sm text-muted-foreground">
+            {users.total === 0
+              ? 'No users'
+              : `Showing ${(currentPage - 1) * PAGE_SIZE + 1}–${Math.min(currentPage * PAGE_SIZE, users.total)} of ${users.total} users`}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage <= 1}
+              onClick={() => fetchUsers(currentPage - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Page {currentPage} of {users.totalPages || 1}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage >= (users.totalPages || 1)}
+              onClick={() => fetchUsers(currentPage + 1)}
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Activate/Deactivate confirmation dialog */}

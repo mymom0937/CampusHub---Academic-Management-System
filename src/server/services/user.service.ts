@@ -1,4 +1,4 @@
-import { auth } from '@/lib/auth'
+import { hashPassword } from 'better-auth/crypto'
 import { AppError } from '@/server/errors/AppError'
 import * as userRepo from '@/server/repositories/user.repository'
 import type { CreateUserInput, UpdateUserInput } from '@/server/validators/user.schema'
@@ -6,46 +6,29 @@ import type { UserListItem, UserDetail } from '@/types/dto'
 import type { PaginatedData } from '@/types/api'
 import type { UserRole } from '@/types/roles'
 
-/** Create a new user (admin) - uses Better-Auth to create user + account */
+/** Create a new user (admin) - creates user + account directly without signing in */
 export async function createUser(input: CreateUserInput): Promise<UserListItem> {
   const existing = await userRepo.findUserByEmail(input.email)
   if (existing) {
     throw new AppError('CONFLICT', 'A user with this email already exists')
   }
 
-  // Use Better-Auth server API to create user (handles password hashing & account creation)
-  const result = await auth.api.signUpEmail({
-    body: {
-      name: `${input.firstName} ${input.lastName}`,
-      email: input.email,
-      password: input.password,
-      firstName: input.firstName,
-      lastName: input.lastName,
-    },
+  const user = await userRepo.createUserWithAccount({
+    email: input.email,
+    password: await hashPassword(input.password),
+    firstName: input.firstName,
+    lastName: input.lastName,
+    role: (input.role || 'STUDENT') as UserRole,
   })
 
-  if (!result) {
-    throw new AppError('INTERNAL_ERROR', 'Failed to create user')
-  }
-
-  // Update role if not STUDENT (Better-Auth defaults to STUDENT)
-  const userFields = result.user as Record<string, unknown>
-  let userRole = (userFields.role as UserRole) || 'STUDENT'
-  if (input.role && input.role !== 'STUDENT') {
-    await userRepo.updateUser(result.user.id, { role: input.role as UserRole })
-    userRole = input.role as UserRole
-  }
-
-  const user = result.user as Record<string, unknown>
-
   return {
-    id: result.user.id,
-    email: result.user.email,
-    firstName: (user.firstName as string) || input.firstName,
-    lastName: (user.lastName as string) || input.lastName,
-    role: userRole,
-    isActive: (user.isActive as boolean) ?? true,
-    createdAt: result.user.createdAt.toISOString(),
+    id: user.id,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    role: user.role as UserRole,
+    isActive: user.isActive,
+    createdAt: user.createdAt.toISOString(),
   }
 }
 
