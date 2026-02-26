@@ -398,7 +398,7 @@ function AdminCourseDetailPage() {
                     loading={assigning}
                     disabled={!selectedInstructorId}
                   >
-                    Assign Instructor
+                    {assigning ? 'Assigning…' : 'Assign Instructor'}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -546,7 +546,7 @@ function AdminCourseDetailPage() {
             </CardContent>
             <CardFooter>
               <Button type="submit" loading={saving}>
-                Save Changes
+                {saving ? 'Saving…' : 'Save Changes'}
               </Button>
             </CardFooter>
           </form>

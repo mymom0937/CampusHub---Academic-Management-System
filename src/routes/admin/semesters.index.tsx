@@ -173,7 +173,7 @@ function AdminSemestersPage() {
                 </div>
                 <DialogFooter>
                   <Button type="submit" loading={creating}>
-                    Create Semester
+                    {creating ? 'Creating Semester…' : 'Create Semester'}
                   </Button>
                 </DialogFooter>
               </form>

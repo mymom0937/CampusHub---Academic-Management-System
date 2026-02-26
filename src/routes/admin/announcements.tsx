@@ -387,7 +387,7 @@ function AdminAnnouncementsPage() {
               </div>
               <DialogFooter>
                 <Button onClick={handleSave} loading={saving}>
-                  {mode === "edit" ? "Save changes" : "Create"}
+                  {saving ? (mode === "edit" ? "Saving…" : "Creating…") : (mode === "edit" ? "Save changes" : "Create")}
                 </Button>
               </DialogFooter>
             </DialogContent>

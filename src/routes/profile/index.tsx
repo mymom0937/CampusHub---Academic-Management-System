@@ -127,7 +127,7 @@ function ProfilePage() {
             </CardContent>
             <CardFooter>
               <Button type="submit" loading={loading}>
-                Save Changes
+                {loading ? 'Saving…' : 'Save Changes'}
               </Button>
             </CardFooter>
           </form>

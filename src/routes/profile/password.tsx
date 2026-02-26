@@ -128,7 +128,7 @@ function ChangePasswordPage() {
                 <Link to="/profile">Cancel</Link>
               </Button>
               <Button type="submit" loading={loading}>
-                Change Password
+                {loading ? 'Changing password…' : 'Change Password'}
               </Button>
             </CardFooter>
           </form>

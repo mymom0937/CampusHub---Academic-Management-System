@@ -171,7 +171,7 @@ function AdminCoursesPage() {
                 </div>
                 <DialogFooter>
                   <Button type="submit" loading={creating}>
-                    Create Course
+                    {creating ? 'Creating Course…' : 'Create Course'}
                   </Button>
                 </DialogFooter>
               </form>

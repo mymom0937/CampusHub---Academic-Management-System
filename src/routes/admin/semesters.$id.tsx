@@ -335,7 +335,7 @@ function AdminSemesterDetailPage() {
             </CardContent>
             <CardFooter>
               <Button type="submit" loading={saving}>
-                Save Changes
+                {saving ? 'Saving…' : 'Save Changes'}
               </Button>
             </CardFooter>
           </form>
