@@ -6,7 +6,7 @@ import { GITHUB_URL, SUPPORT_EMAIL, SUPPORT_PHONE } from '@/lib/constants'
 export function LandingContact() {
   return (
     <section id="contact" className="py-16 md:py-24 px-4 scroll-mt-20">
-      <div className="container mx-auto max-w-6xl">
+      <div className="container mx-auto max-w-6xl lg:max-w-7xl">
         <div className="text-center mb-12">
           <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-2">
             Contact
@@ -19,29 +19,29 @@ export function LandingContact() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <ExternalLink
             href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(SUPPORT_EMAIL)}`}
-            className="block min-w-0 rounded-xl border bg-card p-6 text-center hover:shadow-lg transition-shadow hover:border-primary/30"
+            className="block min-w-0 lg:min-w-[260px] rounded-xl border bg-card p-6 text-center hover:shadow-lg transition-shadow hover:border-primary/30"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary mx-auto mb-4">
               <Mail className="h-6 w-6" />
             </div>
             <h3 className="font-semibold mb-1">Email</h3>
-            <p className="text-sm text-muted-foreground break-words overflow-hidden">{SUPPORT_EMAIL}</p>
+            <p className="text-sm text-muted-foreground break-words overflow-hidden lg:whitespace-nowrap">{SUPPORT_EMAIL}</p>
           </ExternalLink>
           <Link
             to="/"
-            className="block min-w-0 rounded-xl border bg-card p-6 text-center hover:shadow-lg transition-shadow hover:border-primary/30 text-foreground"
+            className="block min-w-0 lg:min-w-[260px] rounded-xl border bg-card p-6 text-center hover:shadow-lg transition-shadow hover:border-primary/30 text-foreground"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary mx-auto mb-4">
               <Globe className="h-6 w-6" />
             </div>
             <h3 className="font-semibold mb-1">Website</h3>
-            <p className="text-sm text-muted-foreground break-words overflow-hidden">
+            <p className="text-sm text-muted-foreground break-words overflow-hidden lg:whitespace-nowrap">
               www.campushub.seidweb.com
             </p>
           </Link>
           <ExternalLink
             href={`tel:+${SUPPORT_PHONE.replace(/\D/g, '')}`}
-            className="block min-w-0 rounded-xl border bg-card p-6 text-center hover:shadow-lg transition-shadow hover:border-primary/30"
+            className="block min-w-0 lg:min-w-[260px] rounded-xl border bg-card p-6 text-center hover:shadow-lg transition-shadow hover:border-primary/30"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary mx-auto mb-4">
               <Phone className="h-6 w-6" />
@@ -51,7 +51,7 @@ export function LandingContact() {
           </ExternalLink>
           <ExternalLink
             href={GITHUB_URL}
-            className="block min-w-0 rounded-xl border bg-card p-6 text-center hover:shadow-lg transition-shadow hover:border-primary/30"
+            className="block min-w-0 lg:min-w-[260px] rounded-xl border bg-card p-6 text-center hover:shadow-lg transition-shadow hover:border-primary/30"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary mx-auto mb-4">
               <Github className="h-6 w-6" />

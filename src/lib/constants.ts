@@ -1,5 +1,5 @@
 /** Support contact */
-export const SUPPORT_EMAIL = "support@campushub.seidweb.com";
+export const SUPPORT_EMAIL = "support@campushub.com";
 /** Support phone (Ethiopian format) - update with real number when available */
 export const SUPPORT_PHONE = "+251-9 xxx xxx xxx";
 
