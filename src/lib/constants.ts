@@ -1,8 +1,11 @@
 /** Support contact */
-export const SUPPORT_EMAIL = 'support@campushub.com'
+export const SUPPORT_EMAIL = "support@campushub.seidweb.com";
+/** Support phone (Ethiopian format) - update with real number when available */
+export const SUPPORT_PHONE = "+251-9 xxx xxx xxx";
 
 /** Social links (update with your org's profiles) */
-export const GITHUB_URL = 'https://github.com'
+export const GITHUB_URL =
+  "https://github.com/mymom0937/CampusHub---Academic-Management-System.git";
 export const TWITTER_URL = 'https://twitter.com'
 export const LINKEDIN_URL = 'https://linkedin.com'
 export const FACEBOOK_URL = 'https://facebook.com'

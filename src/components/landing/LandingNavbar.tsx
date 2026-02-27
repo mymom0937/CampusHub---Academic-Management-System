@@ -85,7 +85,7 @@ export function LandingNavbar({ user, dashboardPath }: LandingNavbarProps) {
               </Button>
               <Button
                 variant="outline"
-                className="gap-2"
+                className="gap-2 bg-red-600 hover:bg-red-700 text-white border-0 hover:text-white focus-visible:ring-red-500 disabled:opacity-70 dark:bg-red-600 dark:hover:bg-red-700 dark:text-white dark:hover:text-white"
                 onClick={handleLogout}
                 disabled={loggingOut}
               >
@@ -154,7 +154,7 @@ export function LandingNavbar({ user, dashboardPath }: LandingNavbarProps) {
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-full gap-2"
+                  className="w-full gap-2 bg-red-600 hover:bg-red-700 text-white border-0 hover:text-white focus-visible:ring-red-500 disabled:opacity-70 dark:bg-red-600 dark:hover:bg-red-700 dark:text-white dark:hover:text-white"
                   onClick={handleLogout}
                   disabled={loggingOut}
                 >

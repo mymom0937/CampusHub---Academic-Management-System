@@ -25,23 +25,26 @@ export function AppFooter() {
           </Link>
 
           {/* Policy links */}
-          <nav className="flex items-center gap-6 text-base" aria-label="Footer navigation">
+          <nav
+            className="flex items-center divide-x-2 divide-border text-base"
+            aria-label="Footer navigation"
+          >
             <Link
               to="/"
               hash="about"
-              className="text-muted-foreground hover:text-foreground transition-colors font-nav"
+              className="pr-4 text-muted-foreground hover:text-foreground transition-colors font-nav"
             >
               About Us
             </Link>
             <Link
               to="/privacy-policy"
-              className="text-muted-foreground hover:text-foreground transition-colors font-nav"
+              className="px-4 text-muted-foreground hover:text-foreground transition-colors font-nav"
             >
               Privacy Policy
             </Link>
             <Link
               to="/terms-of-service"
-              className="text-muted-foreground hover:text-foreground transition-colors font-nav"
+              className="pl-4 text-muted-foreground hover:text-foreground transition-colors font-nav"
             >
               Terms of Service
             </Link>
@@ -90,6 +93,13 @@ export function AppFooter() {
         </div>
         <p className="text-center text-sm text-muted-foreground mt-4 pt-4 border-t border-border/50">
           © {new Date().getFullYear()} CampusHub. All rights reserved.
+          <ExternalLink
+            href="https://www.linkedin.com/in/seid-endris-dev/"
+            className="block mt-1 text-xs text-amber-500 hover:text-amber-400 hover:underline transition-colors duration-200 underline-offset-2"
+            aria-label="Seid Endris on LinkedIn"
+          >
+            Built by Seid E.
+          </ExternalLink>
         </p>
       </div>
     </footer>
